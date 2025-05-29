@@ -24,7 +24,8 @@ import { Form, FormField } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
 
-const loginSchema = z.object({
+const registerSchema = z.object({
+  name: z.string().trim().min(1, { message: "Nome é obrigatório" }),
   email: z
     .string()
     .trim()
@@ -36,54 +37,69 @@ const loginSchema = z.object({
     .min(8, { message: "A senha deve ter pelo menos 8 caracteres" }),
 });
 
-const LoginForm = () => {
+const SignUpForm = () => {
   const router = useRouter();
-  const form = useForm<z.infer<typeof loginSchema>>({
-    resolver: zodResolver(loginSchema),
+  const form = useForm<z.infer<typeof registerSchema>>({
+    resolver: zodResolver(registerSchema),
     defaultValues: {
+      name: "",
       email: "",
       password: "",
     },
   });
 
-  const handleSubmit = async (values: z.infer<typeof loginSchema>) => {
-    await authClient.signIn.email(
+  async function onSubmit(values: z.infer<typeof registerSchema>) {
+    await authClient.signUp.email(
       {
         email: values.email,
         password: values.password,
+        name: values.name,
       },
       {
         onSuccess: () => {
           router.push("/dashboard");
         },
-        onError: () => {
-          toast.error("E-mail ou senha inválidos.");
+        onError: (ctx) => {
+          if (ctx.error.code === "USER_ALREADY_EXISTS") {
+            toast.error("E-mail já cadastrado.");
+            return;
+          }
+          toast.error("Erro ao criar conta.");
         },
       },
     );
-  };
-
-  const handleGoogleLogin = async () => {
-    await authClient.signIn.social({
-      provider: "google",
-      callbackURL: "/dashboard",
-      scopes: ["email", "profile"],
-    });
-  };
+  }
 
   return (
     <Card className="w-full max-w-md mx-auto border-none shadow-lg bg-white/50 backdrop-blur-sm">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <CardHeader className="space-y-2 text-center">
             <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Login
+              Criar conta
             </CardTitle>
             <CardDescription className="text-gray-500">
-              Faça login para continuar
+              Crie uma conta para continuar
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-700">Nome</FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="Digite seu nome" 
+                      {...field} 
+                      className="transition-all duration-300 focus:scale-105 focus:ring-2 focus:ring-blue-500/20"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="email"
@@ -92,7 +108,7 @@ const LoginForm = () => {
                   <FormLabel className="text-gray-700">E-mail</FormLabel>
                   <FormControl>
                     <Input 
-                      placeholder="Seu melhor e-mail" 
+                      placeholder="Digite seu e-mail" 
                       {...field} 
                       className="transition-all duration-300 focus:scale-105 focus:ring-2 focus:ring-blue-500/20"
                     />
@@ -108,10 +124,10 @@ const LoginForm = () => {
                 <FormItem>
                   <FormLabel className="text-gray-700">Senha</FormLabel>
                   <FormControl>
-                    <Input 
-                      type="password" 
-                      placeholder="Digite sua senha" 
-                      {...field} 
+                    <Input
+                      placeholder="Digite sua senha"
+                      type="password"
+                      {...field}
                       className="transition-all duration-300 focus:scale-105 focus:ring-2 focus:ring-blue-500/20"
                     />
                   </FormControl>
@@ -121,21 +137,21 @@ const LoginForm = () => {
             />
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
-            <Button 
-              type="submit" 
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105" 
+            <Button
+              type="submit"
+              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105"
               disabled={form.formState.isSubmitting}
             >
               {form.formState.isSubmitting ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Entrando...
+                  Criando conta...
                 </>
               ) : (
-                "Entrar"
+                "Criar conta"
               )}
             </Button>
-            
+
             <div className="relative w-full">
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t border-gray-300" />
@@ -152,7 +168,6 @@ const LoginForm = () => {
                 variant="outline" 
                 className="w-full hover:bg-gray-50 transition-all duration-300 transform hover:scale-105" 
                 type="button"
-                onClick={handleGoogleLogin}
               >
                 <FcGoogle className="mr-2 h-4 w-4" />
                 Google
@@ -173,4 +188,4 @@ const LoginForm = () => {
   );
 };
 
-export default LoginForm;
+export default SignUpForm;

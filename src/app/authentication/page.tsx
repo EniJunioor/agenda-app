@@ -1,41 +1,31 @@
-"use client";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import SingUpForm from "./components/sing-up-form";
+import { auth } from "@/lib/auth";
+
 import LoginForm from "./components/login-form";
+import SignUpForm from "./components/sign-up-form";
 
-
-
-const AuthenticationPage = () => {
-
+const AuthenticationPage = async () => {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+  if (session?.user) {
+    redirect("/dashboard");
+  }
   return (
-    <div className="flex min-h-screen w-screen items-center justify-center bg-gradient-to-br from-gray-100 to-white px-4">
-      <Tabs defaultValue="login" className="w-full max-w-md bg-white rounded-2xl shadow-xl p-6">
-        <TabsList className="grid w-full grid-cols-2 mb-4 bg-gray-100 rounded-xl p-1">
-          <TabsTrigger value="login" className="rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-md">
-            Login
-          </TabsTrigger>
-          <TabsTrigger value="register" className="rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-md">
-            Criar conta
-          </TabsTrigger>
+    <div className="flex h-screen w-screen items-center justify-center">
+      <Tabs defaultValue="login" className="w-[400px]">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="login">Login</TabsTrigger>
+          <TabsTrigger value="register">Criar conta</TabsTrigger>
         </TabsList>
-
         <TabsContent value="login">
-          <LoginForm/>
+          <LoginForm />
         </TabsContent>
-
         <TabsContent value="register">
-          <SingUpForm/>
+          <SignUpForm />
         </TabsContent>
       </Tabs>
     </div>
