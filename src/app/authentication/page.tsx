@@ -12,6 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SingUpForm from "./components/sing-up-form";
+import LoginForm from "./components/login-form";
 
 
 
@@ -30,19 +31,7 @@ const AuthenticationPage = () => {
         </TabsList>
 
         <TabsContent value="login">
-          <Card className="border-none shadow-none">
-            <CardHeader className="space-y-1">
-              <CardTitle className="text-2xl font-bold">Login</CardTitle>
-              <CardDescription>Faça login para continuar</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Input placeholder="E-mail" />
-              <Input placeholder="Senha" type="password" />
-            </CardContent>
-            <CardFooter>
-              <Button className="w-full">Entrar</Button>
-            </CardFooter>
-          </Card>
+          <LoginForm/>
         </TabsContent>
 
         <TabsContent value="register">
