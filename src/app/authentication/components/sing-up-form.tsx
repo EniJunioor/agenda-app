@@ -2,10 +2,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { authClient } from '@/lib/auth-client';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from "zod";
-
+import {Loader2} from "lucide-react"
 
 const registerSchema = z.object({
     name: z.string().min(1, { message: "Nome é obrigatório" }).max(50),
@@ -24,8 +25,31 @@ const SingUpForm = () => {
         },
       });
     
-      function onSubmit(values: z.infer<typeof registerSchema>) {
-        console.log(values);
+      async function onSubmit(values: z.infer<typeof registerSchema>) {
+        try {
+          const response = await fetch('/api/auth/sign-up/email', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              email: values.email,
+              password: values.password,
+              name: values.name,
+              callbackURL: `${window.location.origin}/dashboard`,
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error('Erro ao criar usuário');
+          }
+
+          const data = await response.json();
+          // Redirecionar para o dashboard após o sucesso
+          window.location.href = '/dashboard';
+        } catch (error) {
+          console.error('Erro:', error);
+        }
       }
 
     return(
@@ -78,7 +102,11 @@ const SingUpForm = () => {
                   />
                 </CardContent>
                 <CardFooter>
-                  <Button type="submit" className="w-full">Cadastrar</Button>
+                  <Button type="submit" className="w-full" disabled={form.formState.isSubmitting} >
+                  {form.formState.isSubmitting ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ): ("Criar Conta")}
+                  </Button>
                 </CardFooter>
               </form>
             </Form>
