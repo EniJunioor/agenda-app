@@ -1,12 +1,25 @@
 "use client";
 
-import { CalendarDays,  LayoutDashboard,  LogOut,  Stethoscope, UserRound } from "lucide-react"
-import Image from "next/image"
-import Link from "next/link"
+import {
+  CalendarDays,
+  Diamond,
+  Gem,
+  LayoutDashboard,
+  LogOut,
+  Stethoscope,
+  UsersRound,
+} from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Sidebar,
   SidebarContent,
@@ -18,10 +31,9 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
-import { authClient } from "@/lib/auth-client"
+} from "@/components/ui/sidebar";
+import { authClient } from "@/lib/auth-client";
 
-// Menu items.
 const items = [
   {
     title: "Dashboard",
@@ -34,37 +46,35 @@ const items = [
     icon: CalendarDays,
   },
   {
-    title: "Medicos",
+    title: "Médicos",
     url: "/doctors",
     icon: Stethoscope,
   },
   {
-    title: "Pacients",
-    url: "/pacients",
-    icon: UserRound,
+    title: "Pacientes",
+    url: "/patients",
+    icon: UsersRound,
   },
-  
-]
+];
 
 export function AppSidebar() {
   const router = useRouter();
   const session = authClient.useSession();
   const pathname = usePathname();
- 
 
-  const handleSingOut = async () => {
-   await authClient.signOut({
-    fetchOptions: {
-      onSuccess: () => {
-        router.push("/authentication")
-      }
-    }
-   })
-  }
+  const handleSignOut = async () => {
+    await authClient.signOut({
+      fetchOptions: {
+        onSuccess: () => {
+          router.push("/authentication");
+        },
+      },
+    });
+  };
   return (
     <Sidebar>
-      <SidebarHeader className="p-4 border-b">
-        <Image src="/logo.svg" alt="Doutor Agenda" width={36} height={28}/>
+      <SidebarHeader className="border-b p-4">
+        <Image src="/logo.svg" alt="Doutor Agenda" width={136} height={28} />
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
@@ -84,6 +94,24 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+        <SidebarGroup>
+          <SidebarGroupLabel>Outros</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname === "/subscription"}
+                >
+                  <Link href="/subscription">
+                    <Gem />
+                    <span>Assinatura</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
@@ -95,15 +123,19 @@ export function AppSidebar() {
                     <AvatarFallback>F</AvatarFallback>
                   </Avatar>
                   <div>
-                    <p className="text-sm">{session.data?.user.clinic.name}</p>
-                    <p className="text-sm text-muted-foreground">{session.data?.user.email}</p>
+                    <p className="text-sm">
+                      {session.data?.user?.clinic?.name}
+                    </p>
+                    <p className="text-muted-foreground text-sm">
+                      {session.data?.user.email}
+                    </p>
                   </div>
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                <DropdownMenuItem onClick={handleSingOut}>
+                <DropdownMenuItem onClick={handleSignOut}>
                   <LogOut />
-                    Sair
+                  Sair
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -111,5 +143,5 @@ export function AppSidebar() {
         </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
-  )
+  );
 }
